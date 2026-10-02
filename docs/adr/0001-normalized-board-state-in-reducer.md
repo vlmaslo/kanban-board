@@ -24,7 +24,7 @@ A. `BoardState` is `{ items: Record<id, Item>, columns: Record<ColumnId, id[]> }
 ## Consequences
 
 - Moving or reordering never touches an item object.
-- The reducer is pure, so it can be unit-tested without rendering anything.
+- The reducer is pure and unit-tested without rendering anything.
 - The whole board is one serialisable value, which makes persistence a small addition.
 - `findColumn` scans the column arrays to locate a card. That is fine for tens of cards.
 - **Reconsider if:** state is needed far from `App`, or several boards are loaded at once.
