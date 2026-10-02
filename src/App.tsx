@@ -9,7 +9,8 @@ export default function App() {
   return (
     <div className="mx-auto max-w-7xl px-4 pt-6 pb-12">
       <header className="mb-5">
-        <h1 className="text-2xl font-bold tracking-tight">Kanban</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Rick and Morty Kanban</h1>
+        <p className="text-muted">Drag cards between columns. Finish something to celebrate.</p>
       </header>
 
       <main className="grid items-start gap-5 grid-cols-1 lg:grid-cols-[20rem_1fr]">
