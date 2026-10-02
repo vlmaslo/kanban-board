@@ -42,4 +42,5 @@ D, in `Board.tsx`:
 - A column takes the card as soon as the cursor enters it, whatever its height.
 - A drop on a column's padding lands next to the nearest card instead of at the end.
 - The strategy closes over the current board, so it is recreated on each render.
+- `e2e/drag.spec.ts` has a spec for the tall-column case. It fails with `closestCorners`.
 - **Reconsider if:** columns become scrollable or nested drop targets are added.

@@ -17,7 +17,8 @@ column and the column itself is a drop target:
 - **Left:** the nearest target with a smaller left edge is the card's own column, so the first
   press did nothing visible and a second was needed.
 
-Only the first card in a column moved sideways correctly.
+Only the first card in a column moved sideways correctly, which is all the first keyboard
+test covered.
 
 Separately, [0003](0003-pointer-first-collision-detection.md) kept `closestCorners` for
 keyboard drags, so a card moved by keyboard into a tall empty column hit the same problem
@@ -46,4 +47,6 @@ nothing and the existing `rectIntersection` fallback picks whatever the card ove
   edges.
 - A card moved sideways lands at the top of the target column; Up and Down place it from there.
 - Keyboard moves into tall empty columns work.
+- `e2e/drag.spec.ts` has a `keyboard` group: empty column, reorder up and down, a column that
+  has cards, a card that is not first, a tall empty column, across to Done, back left, Escape.
 - The getter assumes columns are laid out left to right in `COLUMNS` order.

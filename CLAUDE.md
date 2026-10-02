@@ -9,6 +9,7 @@ API. There is no backend.
 ```bash
 npm run dev            # Vite dev server
 npm test               # Vitest, run once; must stay green
+npm run e2e            # Playwright drag-and-drop tests (Chromium); must stay green
 npm run lint           # oxlint; must report nothing
 npm run format:check   # Prettier; `npm run format` to fix
 npm run build          # tsc -b, then vite build
@@ -33,6 +34,7 @@ changing state shape or drag and drop, and say so if a change contradicts it.
 - No sideways scrolling at 320px wide.
 - When the UI changes without moving focus, announce it (see the drag announcements in
   `Board`).
+- Add an axe state to `e2e/a11y.spec.ts` for every new screen state (dialog, menu, error).
 
 ## Conventions
 
@@ -52,4 +54,7 @@ changing state shape or drag and drop, and say so if a change contradicts it.
   persistence, filtering or other features ahead of being asked.
 - Formatting is Prettier's job (no semicolons, single quotes, 100 columns). A hook formats
   files after each edit; don't hand-format.
+- Drag and drop cannot be tested in jsdom; it is covered by Playwright in `e2e/`. After
+  changing `Board`, `Column` or `SortableCard`, run `npm run e2e`. Drive drags with stepped
+  `page.mouse` moves, as the helpers in `e2e/drag.spec.ts` do.
 - Before finishing a change, run `npm test`, `npm run lint` and `npm run build`.
