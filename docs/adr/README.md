@@ -1,7 +1,8 @@
 # Decision records
 
 Short records for the four decisions that took real thought. Each has the context, the options
-weighed, the decision and its consequences.
+weighed, the decision and its consequences. Smaller choices are one-line bullets in the main
+[README](../../README.md).
 
 | #                                                       | Decision                                                    | Status                 |
 | ------------------------------------------------------- | ----------------------------------------------------------- | ---------------------- |

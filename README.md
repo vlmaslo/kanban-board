@@ -1,32 +1,95 @@
-# React + TypeScript + Vite
+# Rick and Morty Kanban
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A frontend-only Kanban board with three columns (To Do, Doing, Done), built with React 19,
+TypeScript and Vite. Every item is assigned a Rick and Morty character, loaded from the
+[Rick and Morty GraphQL API](https://rickandmortyapi.com/graphql).
 
-Currently, two official plugins are available:
+## Run it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Needs Node.js 22 and npm.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev        # http://localhost:5173
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The character list is fetched from the public API in the browser, so it needs a network
+connection. There is no backend and there are no environment variables.
+
+```bash
+npm test                          # unit and component tests (Vitest)
+npx playwright install chromium   # once
+npm run e2e                       # drag-and-drop and accessibility checks (Playwright)
+npm run lint && npm run build
+```
+
+## Structure
+
+```
+src/
+  App.tsx                       owns the board state (useReducer)
+  types.ts                      Character, Item, BoardState, COLUMNS
+  state/boardReducer.ts         add / remove / move / restore
+  api/rickAndMorty.ts           the GraphQL query, via fetch
+  hooks/useCharacters.ts        loading / error / retry, abort on unmount
+  lib/                          confetti, keyboard movement, shared class lists
+  components/
+    Board/                      DndContext, drag handlers, collision detection
+    Column/                     droppable column + SortableContext
+    SortableCard/               useSortable wrapper
+    CardView/                   presentational card
+    NewItemForm/                title, description, character list; validation
+```
+
+```
+App ─┬─ NewItemForm ── useCharacters ── fetchCharacters
+     └─ Board ── Column ── SortableCard ── CardView
+          └──── DragOverlay ── CardView
+```
+
+## Design decisions
+
+- **State is normalized and lives in one reducer.** `items` is a map by id; `columns` holds
+  ordered id arrays. Moving a card never touches the item, and the reducer is a pure function
+  with its own tests. ([0001](docs/adr/0001-normalized-board-state-in-reducer.md))
+- **Cards move between columns live during the drag**, so the target column opens a gap. A
+  snapshot taken at drag start restores the board if the drag is cancelled. The cost: the
+  reducer sees half-finished drags.
+  ([0002](docs/adr/0002-live-drag-preview-with-snapshot-restore.md))
+- **Collision detection follows the pointer.** dnd-kit's stock `closestCorners` lets a tall
+  empty column lose to the cards beside it.
+  ([0003](docs/adr/0003-pointer-first-collision-detection.md))
+- **Arrow keys move a card one column at a time.** dnd-kit's stock keyboard movement only
+  worked for the top card in a column here.
+  ([0004](docs/adr/0004-keyboard-moves-between-columns.md))
+- **dnd-kit for drag and drop:** headless, with mouse, touch and keyboard sensors.
+- **`CardView` is presentational; `SortableCard` adds the drag wiring**, so the same card
+  renders in a column and in the drag overlay.
+- **Plain `fetch` for the one GraphQL query**, in a small hook with loading, error and retry
+  states. No GraphQL client.
+- **The character field is a list of native radio buttons** styled as rows with a picture and
+  a name. Arrow keys, focus and form semantics come from the browser, with no custom ARIA
+  code; the cost is that only the first page of characters is offered.
+- **Confetti fires only when a card enters Done from another column**, not when it is
+  reordered there, and is skipped under reduced motion.
+- **Tailwind v4 with a few tokens** in `src/index.css`, in a monochrome palette.
+
+## Tests
+
+- **Vitest and Testing Library:** the reducer directly; components through roles and labels,
+  with the API module mocked.
+- **Playwright in Chromium:** drag and drop needs real layout, which jsdom does not have. The
+  specs cover moving, reordering, the Done celebration, cancelling and keyboard moves. The
+  character API is stubbed, so they run offline.
+- **Accessibility:** cards can be moved with the keyboard (focus a card, Space, arrow keys,
+  Space; Escape cancels), controls are labelled, and axe-core runs against four states of the
+  app. It has not been tried with a screen reader or on a touch device.
+
+## Known limitations
+
+- **Nothing is saved.** The board resets on reload.
+- **Only the first 20 characters can be chosen.** The API paginates and only the first page
+  is requested.
+- **Items cannot be edited** after they are created, only moved or deleted.
+- **Cards cannot be moved with a single click or tap**, only by dragging or with the keyboard.
+- **Deleting a card leaves keyboard focus on the page body.**

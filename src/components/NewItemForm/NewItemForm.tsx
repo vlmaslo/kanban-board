@@ -66,7 +66,6 @@ export function NewItemForm({ onCreate }: Props) {
             className={inputClass}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Get schwifty"
             aria-invalid={showTitleError}
             aria-describedby={showTitleError ? titleErrorId : undefined}
           />

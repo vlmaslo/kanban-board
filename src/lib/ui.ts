@@ -1,7 +1,7 @@
 // Shared class lists for native elements used across components.
 
 export const inputClass =
-  'w-full rounded-lg border border-control bg-surface px-2.5 py-2 text-ink placeholder:text-muted ' +
+  'w-full rounded-lg border border-control bg-surface px-2.5 py-2 text-ink ' +
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ' +
   'aria-invalid:border-ink'
 

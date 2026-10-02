@@ -2,7 +2,7 @@
 
 Frontend-only Kanban board (To Do, Doing, Done) in React 19, TypeScript and Vite. Items are
 created through a form and must have a Rick and Morty character, fetched from a public GraphQL
-API. There is no backend.
+API. There is no backend. See `README.md` for setup and the structure.
 
 ## Commands
 
@@ -17,9 +17,10 @@ npm run build          # tsc -b, then vite build
 
 ## Decisions
 
-Four decisions have a record in `docs/adr/`: state shape (0001), live moves during a drag
-(0002), collision detection (0003) and keyboard movement (0004). Read the relevant one before
-changing state shape or drag and drop, and say so if a change contradicts it.
+The README lists the design decisions. Four have a longer record in `docs/adr/`: state shape
+(0001), live moves during a drag (0002), collision detection (0003) and keyboard movement
+(0004). Read the relevant one before changing state shape or drag and drop, and say so if a
+change contradicts it.
 
 ## Accessibility
 
