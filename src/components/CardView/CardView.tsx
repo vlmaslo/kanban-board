@@ -57,19 +57,19 @@ export function CardView({ item, onRemove, variant = 'default', completed = fals
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <h3
             className={clsx(
-              'pr-6 text-[0.95rem] font-semibold wrap-anywhere',
+              'pr-6 text-base font-semibold wrap-anywhere',
               completed && 'line-through text-muted',
             )}
           >
             {item.title}
           </h3>
           {item.description && (
-            <p className="text-[0.8125rem] text-muted wrap-anywhere">{item.description}</p>
+            <p className="text-sm text-muted wrap-anywhere">{item.description}</p>
           )}
           <p
             className={clsx(
               'inline-flex flex-wrap items-center gap-x-1.5 text-xs',
-              "before:size-[7px] before:rounded-full before:content-['']",
+              "before:size-2 before:rounded-full before:content-['']",
               statusDot[character.status],
             )}
           >
