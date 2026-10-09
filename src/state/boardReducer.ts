@@ -6,7 +6,6 @@ export type BoardAction =
   | { type: 'remove'; id: string }
   // `index` is where the card ends up, in the same column or another one.
   | { type: 'move'; id: string; to: ColumnId; index: number }
-  | { type: 'restore'; state: BoardState }
 
 export const initialBoard: BoardState = {
   items: {},
@@ -69,8 +68,5 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
         },
       }
     }
-
-    case 'restore':
-      return action.state
   }
 }

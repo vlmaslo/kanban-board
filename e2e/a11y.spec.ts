@@ -90,6 +90,31 @@ test('drag announcements name the card and the column', async ({ page }) => {
   await expect(liveRegion).toHaveText('Moving Alpha was cancelled. It was put back.')
 })
 
+test('undo is a big enough target, keeps focus and announces what it undid', async ({ page }) => {
+  const undo = page.getByRole('button', { name: 'Undo', exact: true })
+  await expect(undo).toHaveAttribute('aria-disabled', 'true')
+  const box = await undo.boundingBox()
+  expect(box?.width).toBeGreaterThanOrEqual(24)
+  expect(box?.height).toBeGreaterThanOrEqual(24)
+
+  await addCard(page, 'Alpha')
+  await pickUp(page, 'Alpha')
+  await arrow(page, 'ArrowRight')
+  await drop(page, 'Alpha')
+  await undo.click()
+  await expect(page.getByRole('status').filter({ hasText: 'Undid' })).toHaveText(
+    'Undid: moved Alpha to Doing.',
+  )
+
+  await undo.click()
+  await expect(page.getByRole('status').filter({ hasText: 'Undid' })).toHaveText(
+    'Undid: added Alpha.',
+  )
+  await expect(undo).toHaveAttribute('aria-disabled', 'true')
+  await expect(undo).toBeFocused()
+  await expectNoViolations(page)
+})
+
 test.describe('narrow screen', () => {
   test.use({ viewport: { width: 320, height: 640 } })
 

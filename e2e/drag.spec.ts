@@ -254,3 +254,75 @@ test.describe('keyboard', () => {
     await expect(titles(column(page, 'Doing'))).toHaveCount(0)
   })
 })
+
+// A drag dispatches a move for every column it crosses. Undo treats it as one step.
+test.describe('undo', () => {
+  const undoButton = (page: Page) => page.getByRole('button', { name: 'Undo', exact: true })
+
+  /**
+   * Clicks Undo once the lifted copy has landed. dnd-kit swallows clicks for 50ms after a
+   * pointer drag ends, so that releasing a card does not click what is under it.
+   */
+  async function undo(page: Page) {
+    await expect(page.locator('[data-state="dragging"]')).toHaveCount(0)
+    await undoButton(page).click()
+  }
+
+  test('one undo puts back a card dragged across two columns', async ({ page }) => {
+    await addCard(page, 'Alpha')
+    await addCard(page, 'Beta')
+    const todo = column(page, 'To Do')
+    const done = column(page, 'Done')
+
+    // The straight path from To Do to Done passes over Doing.
+    await dragAndDrop(page, draggable(page, 'Beta'), done.getByRole('list'))
+    await expect(titles(done)).toHaveText(['Beta'])
+
+    await undo(page)
+
+    await expect(titles(todo)).toHaveText(['Beta', 'Alpha'])
+    await expect(titles(column(page, 'Doing'))).toHaveCount(0)
+    await expect(titles(done)).toHaveCount(0)
+  })
+
+  test('undoes a reorder', async ({ page }) => {
+    await addCard(page, 'Alpha')
+    await addCard(page, 'Beta')
+    const todo = column(page, 'To Do')
+    await dragAndDrop(page, draggable(todo, 'Beta'), card(todo, 'Alpha'))
+    await expect(titles(todo)).toHaveText(['Alpha', 'Beta'])
+
+    await undo(page)
+
+    await expect(titles(todo)).toHaveText(['Beta', 'Alpha'])
+  })
+
+  test('a cancelled drag is not a step', async ({ page }) => {
+    await addCard(page, 'Stay put')
+    await dragOver(page, draggable(page, 'Stay put'), column(page, 'Doing').getByRole('list'))
+    await page.keyboard.press('Escape')
+    await page.mouse.up()
+    await expect(titles(column(page, 'To Do'))).toHaveText(['Stay put'])
+
+    // The only step is creating the card, so one undo empties the board.
+    await undo(page)
+
+    await expect(page.getByRole('article')).toHaveCount(0)
+    await expect(undoButton(page)).toHaveAttribute('aria-disabled', 'true')
+  })
+
+  test('one undo puts back a card moved two columns with the keyboard', async ({ page }) => {
+    await addCard(page, 'Alpha')
+    await addCard(page, 'Beta')
+    await pickUp(page, 'Alpha')
+    await arrow(page, 'ArrowRight')
+    await arrow(page, 'ArrowRight')
+    await drop(page, 'Alpha')
+    await expect(titles(column(page, 'Done'))).toHaveText(['Alpha'])
+
+    await undo(page)
+
+    await expect(titles(column(page, 'To Do'))).toHaveText(['Beta', 'Alpha'])
+    await expect(titles(column(page, 'Done'))).toHaveCount(0)
+  })
+})

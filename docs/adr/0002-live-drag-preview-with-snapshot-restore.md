@@ -1,6 +1,7 @@
 # 0002. Move cards live during a drag and restore a snapshot on cancel
 
-- **Status:** Accepted
+- **Status:** Accepted, amended by [0005](0005-undo-history-as-board-snapshots.md) (the
+  snapshot lives in the history reducer; `dragCancel` replaces `restore`)
 - **Date:** 2026-10-01
 
 ## Context

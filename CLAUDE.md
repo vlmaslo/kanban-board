@@ -17,10 +17,10 @@ npm run build          # tsc -b, then vite build
 
 ## Decisions
 
-The README lists the design decisions. Four have a longer record in `docs/adr/`: state shape
-(0001), live moves during a drag (0002), collision detection (0003) and keyboard movement
-(0004). Read the relevant one before changing state shape or drag and drop, and say so if a
-change contradicts it.
+The README lists the design decisions. Five have a longer record in `docs/adr/`: state shape
+(0001), live moves during a drag (0002), collision detection (0003), keyboard movement (0004)
+and undo history (0005). Read the relevant one before changing state shape, drag and drop or
+undo, and say so if a change contradicts it.
 
 ## Accessibility
 
@@ -40,7 +40,8 @@ change contradicts it.
 ## Conventions
 
 - **Board changes go through `boardReducer`.** Keep it pure, and add a reducer test for every
-  new action.
+  new action. `historyReducer` wraps it: a new action is undoable without further work, and
+  anything dispatched between `dragStart` and `dragEnd` is one undo step.
 - **One folder per component**: `Name.tsx`, `Name.test.tsx`, `index.ts`. Named exports only,
   except `App`.
 - **`CardView` stays free of dnd-kit.** Drag wiring belongs in `SortableCard` and `Board`.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { makeItem, sampleBoard } from '../test/fixtures'
-import { boardReducer, enteredDone, findColumn, initialBoard } from './boardReducer'
+import { boardReducer, enteredDone, findColumn } from './boardReducer'
 
 describe('boardReducer', () => {
   it('adds new items to the top of To Do', () => {
@@ -43,10 +43,6 @@ describe('boardReducer', () => {
     expect(boardReducer(sampleBoard, { type: 'move', id: 'b', to: 'todo', index: 1 })).toBe(
       sampleBoard,
     )
-  })
-
-  it('restores a snapshot', () => {
-    expect(boardReducer(sampleBoard, { type: 'restore', state: initialBoard })).toBe(initialBoard)
   })
 
   it('enteredDone is true only when a card arrives in Done from another column', () => {

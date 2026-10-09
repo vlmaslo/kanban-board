@@ -1,6 +1,7 @@
 # 0001. Normalized board state in a pure reducer
 
-- **Status:** Accepted
+- **Status:** Accepted, amended by [0005](0005-undo-history-as-board-snapshots.md) (`restore`
+  removed; `App` uses `historyReducer`, which wraps `boardReducer`)
 - **Date:** 2026-10-01
 
 ## Context

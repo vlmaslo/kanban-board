@@ -18,7 +18,8 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { COLUMNS, type BoardState, type ColumnId } from '../../types'
-import { enteredDone, findColumn, type BoardAction } from '../../state/boardReducer'
+import { enteredDone, findColumn } from '../../state/boardReducer'
+import type { HistoryAction } from '../../state/historyReducer'
 import { celebrate } from '../../lib/celebrate'
 import { boardKeyboardCoordinates } from '../../lib/keyboardCoordinates'
 import { Column } from '../Column'
@@ -38,14 +39,14 @@ const screenReaderInstructions = {
 
 type Props = {
   board: BoardState
-  dispatch: Dispatch<BoardAction>
+  dispatch: Dispatch<HistoryAction>
 }
 
 export function Board({ board, dispatch }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [celebratingId, setCelebratingId] = useState<string | null>(null)
-  // Board as it was when the drag began: lets us cancel, and tells us where the card came from.
-  const snapshot = useRef<BoardState | null>(null)
+  // The column the drag began in. The celebration needs it: by drop time the card has moved.
+  const origin = useRef<ColumnId | undefined>(undefined)
 
   const sensors = useSensors(
     // A small distance threshold keeps a click on a card from starting a drag.
@@ -82,7 +83,9 @@ export function Board({ board, dispatch }: Props) {
   }
 
   function handleDragStart({ active }: DragStartEvent) {
-    snapshot.current = board
+    origin.current = findColumn(board, String(active.id))
+    // Everything until dragEnd or dragCancel is one step in the undo history.
+    dispatch({ type: 'dragStart' })
     setActiveId(String(active.id))
   }
 
@@ -109,14 +112,12 @@ export function Board({ board, dispatch }: Props) {
 
   function handleDragEnd({ active, over }: DragEndEvent) {
     const activeKey = String(active.id)
-    const origin = snapshot.current ? findColumn(snapshot.current, activeKey) : undefined
     setActiveId(null)
 
     if (!over) {
       handleDragCancel()
       return
     }
-    snapshot.current = null
 
     const column = findColumn(board, activeKey)
     const overKey = String(over.id)
@@ -125,8 +126,9 @@ export function Board({ board, dispatch }: Props) {
       const index = overKey === column ? ids.length - 1 : ids.indexOf(overKey)
       dispatch({ type: 'move', id: activeKey, to: column, index })
     }
+    dispatch({ type: 'dragEnd' })
 
-    if (enteredDone(origin, column)) {
+    if (enteredDone(origin.current, column)) {
       const rect = active.rect.current.translated
       celebrate(rect ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : undefined)
       setCelebratingId(activeKey)
@@ -134,8 +136,7 @@ export function Board({ board, dispatch }: Props) {
   }
 
   function handleDragCancel() {
-    if (snapshot.current) dispatch({ type: 'restore', state: snapshot.current })
-    snapshot.current = null
+    dispatch({ type: 'dragCancel' })
     setActiveId(null)
   }
 
